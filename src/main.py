@@ -1,9 +1,9 @@
 """
-main.py — NatWest 'Code for Purpose' AI Predictive Forecasting Pipeline (CLI)
+main.py — NatWest 'Code for Purpose' Predictive Forecasting Pipeline (CLI)
 
 Orchestrates the three core use-cases from the command line:
   1. Short-term forecasting with uncertainty bands
-  2. Historical anomaly detection with AI-powered explanations
+  2. Historical anomaly detection with automated explanations
   3. What-if scenario modelling compared side-by-side with baseline
 
 Run from the project root:
@@ -47,7 +47,7 @@ def run_pipeline():
         4. Generate a what-if scenario and compare against baseline.
     """
     print("=" * 60)
-    print("  NatWest 'Code for Purpose': AI Predictive Forecasting")
+    print("  NatWest 'Code for Purpose': Advanced Predictive Forecasting")
     print("=" * 60, "\n")
 
     # ------------------------------------------------------------------
@@ -73,7 +73,7 @@ def run_pipeline():
     print()
 
     # ------------------------------------------------------------------
-    # 2. Anomaly Detection & AI Explanation
+    # 2. Anomaly Detection & Insights Explanation
     # ------------------------------------------------------------------
     print("--- 2. ANOMALY DETECTION ---")
     detector = AnomalyDetector(historical_data, target_col=target_metric, date_col='date')

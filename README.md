@@ -1,6 +1,6 @@
-# NatWest Code for Purpose — AI Predictive Forecasting
+# NatWest Code for Purpose — Advanced Predictive Forecasting
 
-> A lightweight, transparent AI forecasting tool that transforms historical data into actionable insights — built for the NatWest Group "Code for Purpose" hackathon.
+> A lightweight, transparent forecasting tool that transforms historical data into actionable insights — built for the NatWest Group "Code for Purpose" hackathon.
 
 ---
 
@@ -9,7 +9,7 @@
 | | |
 |---|---|
 | **What** | A full-stack Python forecasting toolkit with an interactive dashboard, REST API, and database layer. It produces short-term predictions, detects anomalies, and models what-if scenarios — all with built-in explainability. |
-| **Why** | Decision-makers need forecasts they can *trust and understand*. This tool avoids black-box complexity by pairing every AI prediction with a simple baseline and plain-English explanations. |
+| **Why** | Decision-makers need forecasts they can *trust and understand*. This tool avoids black-box complexity by pairing every statistical prediction with a simple baseline and plain-English explanations. |
 | **Who** | Analysts, product managers, and business stakeholders who need rapid, reliable, and easily explainable insights. |
 
 ---
@@ -24,7 +24,7 @@
 ### 2. Anomaly Detection
 - Scans historical data using a **rolling Z-score** approach to flag unexpected spikes or dips
 - Uses **lagged rolling windows** to prevent look-ahead bias
-- Generates **AI-powered explanations** via Google Gemini (free tier) — falls back gracefully to rule-based templates
+- Generates **automated explanations** via statistical heuristics / LLM API (if configured) — falls back gracefully to rule-based templates
 
 ### 3. Scenario Forecasting ("What-If")
 - Apply percentage-based adjustments (e.g. *"+10% traffic"*, *"−15% conversion"*)
@@ -33,7 +33,7 @@
 ### 4. Interactive Dashboard (Streamlit)
 - **Upload CSV** or use bundled sample data
 - **Line charts** with shaded confidence bands (Altair)
-- **Anomaly cards** with AI-generated explanations
+- **Anomaly cards** with automated insights
 - **Real-time What-If slider** that updates projections instantly
 - Premium dark glassmorphism UI
 
@@ -60,7 +60,7 @@
 | Dashboard | `streamlit`, `altair` |
 | REST API | `fastapi`, `uvicorn`, `pydantic` |
 | Database | `sqlalchemy`, SQLite (default) / PostgreSQL |
-| AI Explanations | `google-generativeai` (Gemini Free Tier) |
+| Explanations | Automated statistical heuristics |
 | Environment | `python-dotenv` |
 | Testing | `pytest` |
 
@@ -190,7 +190,7 @@ python -m pytest tests/ -v
 
 ```text
 ============================================================
-  NatWest 'Code for Purpose': AI Predictive Forecasting
+  NatWest 'Code for Purpose': Advanced Predictive Forecasting
 ============================================================
 
 Loaded 52 historical records from sample_data.csv

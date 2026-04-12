@@ -1,5 +1,5 @@
 """
-dashboard.py — Interactive Streamlit Dashboard for NatWest AI Forecasting.
+dashboard.py — Interactive Streamlit Dashboard for NatWest Forecasting.
 
 A single-page application that lets users:
   1. Upload a CSV or use the bundled sample dataset
@@ -36,7 +36,7 @@ from src.core.explainer import AnomalyExplainer
 # Page configuration
 # =====================================================================
 st.set_page_config(
-    page_title="NatWest AI Forecasting",
+    page_title="NatWest Advanced Forecasting",
     page_icon="",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -166,7 +166,7 @@ st.markdown("""
 # Sidebar
 # =====================================================================
 with st.sidebar:
-    st.markdown("## NatWest AI Forecasting")
+    st.markdown("## NatWest Advanced Forecasting")
     st.markdown("<p class='info-text'>Upload your data and configure the forecasting engine.</p>", unsafe_allow_html=True)
     st.markdown("---")
 
@@ -238,7 +238,7 @@ df["date"] = pd.to_datetime(df["date"])
 # =====================================================================
 # Header
 # =====================================================================
-st.markdown("# AI Predictive Forecasting Dashboard")
+st.markdown("# Advanced Predictive Forecasting Dashboard")
 st.markdown("<p class='info-text'>Transparent, explainable forecasting — powered by Holt-Winters Exponential Smoothing with simple baseline comparison.</p>", unsafe_allow_html=True)
 
 # ---- KPI row ----
@@ -529,7 +529,7 @@ st.markdown(
     "<p style='text-align:center; color:#636e72; font-size:0.8rem;'>"
     "Built with for NatWest 'Code for Purpose' Hackathon &nbsp;|&nbsp; "
     "Powered by Holt-Winters Exponential Smoothing &nbsp;|&nbsp; "
-    "AI Explanations via Google Gemini (Free Tier)"
+    "Automated Insights Generation Engine"
     "</p>",
     unsafe_allow_html=True,
 )
