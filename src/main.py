@@ -1,7 +1,7 @@
 """
-main.py — NatWest 'Code for Purpose' AI Predictive Forecasting Pipeline
+main.py — NatWest 'Code for Purpose' AI Predictive Forecasting Pipeline (CLI)
 
-Orchestrates the three core use-cases:
+Orchestrates the three core use-cases from the command line:
   1. Short-term forecasting with uncertainty bands
   2. Historical anomaly detection with AI-powered explanations
   3. What-if scenario modelling compared side-by-side with baseline
@@ -16,22 +16,24 @@ import sys
 import pandas as pd
 
 # ---------------------------------------------------------------------------
-# Ensure the /src directory is on the import path regardless of how the user
-# invokes the script (e.g. `python src/main.py` from project root).
+# Ensure the project root and /src are on the import path
 # ---------------------------------------------------------------------------
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
-if SRC_DIR not in sys.path:
-    sys.path.insert(0, SRC_DIR)
+PROJECT_ROOT = os.path.abspath(os.path.join(SRC_DIR, '..'))
 
-from forecaster import Forecaster
-from anomaly_detector import AnomalyDetector
-from scenario_runner import ScenarioForecaster
-from explainer import AnomalyExplainer
+for path in [SRC_DIR, PROJECT_ROOT]:
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
+from src.core.forecaster import Forecaster
+from src.core.anomaly_detector import AnomalyDetector
+from src.core.scenario_runner import ScenarioForecaster
+from src.core.explainer import AnomalyExplainer
 
 
 def _resolve_data_path() -> str:
     """Return the absolute path to the sample dataset in /assets."""
-    return os.path.join(SRC_DIR, '..', 'assets', 'sample_data.csv')
+    return os.path.join(PROJECT_ROOT, 'assets', 'sample_data.csv')
 
 
 def run_pipeline():

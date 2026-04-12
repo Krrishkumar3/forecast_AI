@@ -8,7 +8,7 @@
 
 | | |
 |---|---|
-| **What** | A Python-based forecasting toolkit that produces short-term predictions, detects anomalies, and models what-if scenarios — all with built-in explainability. |
+| **What** | A full-stack Python forecasting toolkit with an interactive dashboard, REST API, and database layer. It produces short-term predictions, detects anomalies, and models what-if scenarios — all with built-in explainability. |
 | **Why** | Decision-makers need forecasts they can *trust and understand*. This tool avoids black-box complexity by pairing every AI prediction with a simple baseline and plain-English explanations. |
 | **Who** | Analysts, product managers, and business stakeholders who need rapid, reliable, and easily explainable insights. |
 
@@ -18,23 +18,36 @@
 
 ### 1. Short-Term Forecasting (1–6 weeks)
 - Generates a **central "likely" estimate** using Holt-Winters Exponential Smoothing
-- Provides **Low / High uncertainty bounds** (90% confidence interval) so stakeholders see the range of possibilities
-- Includes a **simple moving-average baseline** for transparent comparison — if the model can't beat a basic average, you'll know immediately
+- Provides **Low / High uncertainty bounds** (90% confidence interval)
+- Includes a **simple moving-average baseline** for transparent comparison
 
 ### 2. Anomaly Detection
 - Scans historical data using a **rolling Z-score** approach to flag unexpected spikes or dips
 - Uses **lagged rolling windows** to prevent look-ahead bias
-- Generates **AI-powered explanations** via Google Gemini (free tier) — or falls back gracefully to rule-based templates if no API key is configured
+- Generates **AI-powered explanations** via Google Gemini (free tier) — falls back gracefully to rule-based templates
 
 ### 3. Scenario Forecasting ("What-If")
-- Apply percentage-based adjustments (e.g. *"+10% traffic"*, *"−15% conversion"*) to the baseline forecast
+- Apply percentage-based adjustments (e.g. *"+10% traffic"*, *"−15% conversion"*)
 - View **side-by-side comparison** of baseline vs. scenario with numerical impact
-- Pure arithmetic transformation — results are immediately interpretable
 
-### 4. Anti-Overfitting by Design
-- Every forecast is compared against a **4-week trailing moving average**
-- Seasonal component is disabled for small datasets to prevent spurious patterns
-- Residual-based uncertainty bands honestly reflect model limitations
+### 4. Interactive Dashboard (Streamlit)
+- **Upload CSV** or use bundled sample data
+- **Line charts** with shaded confidence bands (Altair)
+- **Anomaly cards** with AI-generated explanations
+- **Real-time What-If slider** that updates projections instantly
+- Premium dark glassmorphism UI
+
+### 5. REST API (FastAPI)
+- `POST /forecast` — Returns predictions with confidence intervals
+- `POST /detect-anomalies` — Returns flagged indices with Z-score rationales
+- `POST /scenario` — Returns adjusted projections for what-if analysis
+- Auto-generated Swagger docs at `/docs`
+
+### 6. Database Layer (SQLite + SQLAlchemy)
+- **metrics** table for time-series data storage
+- **forecast_history** table for hold-out validation
+- Utility to bridge DB data directly into pandas DataFrames
+- Swappable to PostgreSQL via `DATABASE_URL` env var
 
 ---
 
@@ -43,10 +56,13 @@
 | Component | Technology |
 |---|---|
 | Language | Python 3.9+ |
-| Data & Forecasting | `pandas`, `numpy`, `statsmodels` (Holt-Winters) |
+| Forecasting | `pandas`, `numpy`, `statsmodels` (Holt-Winters) |
+| Dashboard | `streamlit`, `altair` |
+| REST API | `fastapi`, `uvicorn`, `pydantic` |
+| Database | `sqlalchemy`, SQLite (default) / PostgreSQL |
 | AI Explanations | `google-generativeai` (Gemini Free Tier) |
-| Environment Mgmt | `python-dotenv` |
-| Testing | `unittest` (stdlib) |
+| Environment | `python-dotenv` |
+| Testing | `pytest` |
 
 ---
 
@@ -55,21 +71,32 @@
 ```
 forecast_AI/
 ├── assets/
-│   └── sample_data.csv          # 52 weeks of realistic historical data
+│   └── sample_data.csv              # 52 weeks of realistic historical data
+├── data/
+│   └── forecast.db                  # SQLite database (auto-created)
 ├── src/
 │   ├── __init__.py
-│   ├── main.py                  # Pipeline orchestrator
-│   ├── forecaster.py            # Holt-Winters forecasting engine
-│   ├── anomaly_detector.py      # Z-score anomaly detection
-│   ├── scenario_runner.py       # What-if scenario modelling
-│   └── explainer.py             # Gemini / rule-based explanation generator
+│   ├── core/                        # Domain logic (framework-agnostic)
+│   │   ├── __init__.py
+│   │   ├── forecaster.py            # Holt-Winters forecasting engine
+│   │   ├── anomaly_detector.py      # Z-score anomaly detection
+│   │   ├── scenario_runner.py       # What-if scenario modelling
+│   │   └── explainer.py             # Gemini / rule-based explanations
+│   ├── api/                         # REST API layer
+│   │   ├── __init__.py
+│   │   └── app.py                   # FastAPI endpoints
+│   ├── db/                          # Database layer
+│   │   ├── __init__.py
+│   │   └── db_manager.py            # SQLAlchemy models & utilities
+│   ├── dashboard.py                 # Streamlit interactive UI
+│   └── main.py                      # CLI pipeline orchestrator
 ├── tests/
 │   ├── __init__.py
-│   └── test_forecaster.py       # Unit tests for all modules
-├── .env.example                 # Template for API keys (never commit .env)
-├── .gitignore                   # Excludes venv, .env, __pycache__
-├── requirements.txt             # One-command dependency install
-└── README.md                    # This file
+│   └── test_forecaster.py           # 16 unit tests
+├── .env.example                     # Template for API keys
+├── .gitignore
+├── requirements.txt
+└── README.md
 ```
 
 ---
@@ -78,7 +105,7 @@ forecast_AI/
 
 ### Prerequisites
 - Python 3.9 or higher
-- pip (Python package manager)
+- pip
 
 ### Step-by-Step
 
@@ -87,7 +114,7 @@ forecast_AI/
 git clone https://github.com/Krrishkumar3/forecast_AI.git
 cd forecast_AI
 
-# 2. Create a virtual environment (recommended)
+# 2. Create a virtual environment
 python -m venv venv
 source venv/bin/activate        # macOS / Linux
 # venv\Scripts\activate         # Windows
@@ -95,34 +122,71 @@ source venv/bin/activate        # macOS / Linux
 # 3. Install all dependencies
 pip install -r requirements.txt
 
-# 4. Configure environment variables
+# 4. Configure environment variables (optional)
 cp .env.example .env
-# Open .env and paste your Gemini API key (optional — tool works without it)
+# Edit .env to add your GEMINI_API_KEY (optional — tool works without it)
 ```
-
-> **Note:** The tool runs fully offline using rule-based explanations if no `GEMINI_API_KEY` is set. The Gemini integration is an enhancement, not a requirement.
 
 ---
 
 ## ▶️ Usage
 
-### Run the Full Pipeline
+### Option 1: Interactive Dashboard (Recommended)
+
+```bash
+streamlit run src/dashboard.py
+```
+
+Opens a browser with the full interactive dashboard — upload data, adjust settings, see charts and anomalies in real-time.
+
+### Option 2: REST API
+
+```bash
+uvicorn src.api.app:app --reload --port 8000
+```
+
+Then visit http://localhost:8000/docs for the interactive Swagger documentation.
+
+**Example API call:**
+```bash
+curl -X POST http://localhost:8000/forecast \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": [
+      {"date": "2023-01-01", "value": 100},
+      {"date": "2023-01-08", "value": 105},
+      {"date": "2023-01-15", "value": 102},
+      {"date": "2023-01-22", "value": 108},
+      {"date": "2023-01-29", "value": 107},
+      {"date": "2023-02-05", "value": 110},
+      {"date": "2023-02-12", "value": 112},
+      {"date": "2023-02-19", "value": 109}
+    ],
+    "weeks_ahead": 4
+  }'
+```
+
+### Option 3: CLI Pipeline
 
 ```bash
 python src/main.py
 ```
 
-### Run the Tests
+### Option 4: Seed the Database
+
+```bash
+python src/db/db_manager.py
+```
+
+### Run Tests
 
 ```bash
 python -m pytest tests/ -v
-# or
-python -m unittest discover -s tests -v
 ```
 
 ---
 
-## 📊 Example Output
+## 📊 CLI Output Example
 
 ```text
 ============================================================
@@ -132,31 +196,31 @@ python -m unittest discover -s tests -v
 Loaded 52 historical records from sample_data.csv
 
 --- 1. SHORT-TERM FORECAST (Next 4 weeks) ---
-       Date  Baseline_Avg  Likely_Estimate  Low_Bound  High_Bound
- 2023-12-31        116.00           112.47      99.84      125.10
- 2024-01-07        116.00           111.82      99.19      124.45
- 2024-01-14        116.00           111.17      98.54      123.80
- 2024-01-21        116.00           110.52      97.89      123.15
+      Date  Baseline_Avg  Likely_Estimate  Low_Bound  High_Bound
+2023-12-31         116.0           114.37      97.39      131.35
+2024-01-07         116.0           114.69      97.71      131.67
+2024-01-14         116.0           115.01      98.03      131.98
+2024-01-21         116.0           115.32      98.34      132.30
 
 --- 2. ANOMALY DETECTION ---
-Found 2 anomaly(ies) in the historical dataset!
+Found 6 anomaly(ies) in the historical dataset!
 
-  > Date: 2023-10-15  |  Value: 160.0  |  Expected: 106.2
-    [Rule-Based Explanation] This rapid 51% increase deviates from normal
+  > Date: 2023-10-15  |  Value: 160.0  |  Expected: 108.8
+    [Rule-Based Explanation] This rapid 47% increase deviates from normal
     trends, likely driven by a temporary promotional campaign or a
     localised surge in demand.
 
-  > Date: 2023-12-24  |  Value: 98.0  |  Expected: 122.0
-    [Rule-Based Explanation] This sharp 20% drop represents an unexpected
+  > Date: 2023-12-24  |  Value: 98.0  |  Expected: 121.5
+    [Rule-Based Explanation] This sharp 19% drop represents an unexpected
     anomaly, suggesting a potential temporary outage, data delay, or
     regional holiday impacting normal volumes.
 
 --- 3. SCENARIO FORECASTING (What-if: +15% Volume) ---
-       Date  Likely_Estimate  Scenario_(+15.0%)  Numerical_Impact
- 2023-12-31           112.47             129.34             16.87
- 2024-01-07           111.82             128.59             16.77
- 2024-01-14           111.17             127.85             16.68
- 2024-01-21           110.52             127.10             16.58
+      Date  Likely_Estimate  Scenario_(+15.0%)  Numerical_Impact
+2023-12-31           114.37             131.53             17.16
+2024-01-07           114.69             131.89             17.20
+2024-01-14           115.01             132.26             17.25
+2024-01-21           115.32             132.62             17.30
 
 ✅ Pipeline complete.
 ```
@@ -164,7 +228,7 @@ Found 2 anomaly(ies) in the historical dataset!
 > **Reading the output:**
 > - **Baseline_Avg** = simple 4-week trailing mean (sanity check)
 > - **Likely_Estimate** = Holt-Winters model prediction (central estimate)
-> - **Low_Bound / High_Bound** = 90% confidence interval
+> - **Low / High Bound** = 90% confidence interval
 > - **Scenario** = adjusted projection for the what-if assumption
 
 ---
@@ -174,25 +238,20 @@ Found 2 anomaly(ies) in the historical dataset!
 - All API keys are loaded from **environment variables** via `python-dotenv`
 - A `.env.example` is provided as a template — real `.env` files are git-ignored
 - **No secrets are hard-coded** anywhere in the codebase
+- Database URL is configurable via `DATABASE_URL` env var
 
 ---
 
 ## 🧪 Testing
 
-The test suite validates:
+**16 tests** across 4 test classes:
 
-| Test | What it checks |
-|---|---|
-| `test_forecast_returns_correct_number_of_rows` | Output length matches requested horizon |
-| `test_forecast_contains_required_columns` | All transparency columns are present |
-| `test_low_bound_never_negative` | No illogical negative traffic predictions |
-| `test_high_bound_exceeds_low_bound` | Uncertainty bands are correctly ordered |
-| `test_invalid_horizon_raises_error` | Rejects out-of-range forecast requests |
-| `test_detects_injected_spike` | Catches an obvious anomaly in synthetic data |
-| `test_no_anomalies_in_flat_data` | Doesn't false-alarm on constant series |
-| `test_scenario_arithmetic_accuracy` | +10% multiplier is mathematically correct |
-| `test_negative_scenario` | Negative scenarios reduce the estimate |
-| `test_missing_column_raises_error` | Validates input before processing |
+| Class | Tests | What it validates |
+|---|---|---|
+| `TestForecaster` | 5 | Output shape, columns, bounds, validation |
+| `TestAnomalyDetector` | 3 | Spike detection, flat data, Z-score presence |
+| `TestScenarioForecaster` | 4 | Arithmetic accuracy, negative scenarios, errors |
+| `TestDatabaseManager` | 4 | Table CRUD, CSV seeding, forecast history |
 
 ---
 

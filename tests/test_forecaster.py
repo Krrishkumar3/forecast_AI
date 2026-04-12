@@ -5,21 +5,26 @@ Tests cover:
   • Forecaster output shape, column presence, and bound sanity
   • AnomalyDetector correctly flags injected spikes
   • ScenarioForecaster arithmetic accuracy
+  • DatabaseManager CRUD operations
 """
 
 import unittest
 import sys
 import os
+import tempfile
 
 import pandas as pd
 import numpy as np
 
-# Ensure /src is importable when running from the project root
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+# Ensure project root is on sys.path
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
-from forecaster import Forecaster
-from anomaly_detector import AnomalyDetector
-from scenario_runner import ScenarioForecaster
+from src.core.forecaster import Forecaster
+from src.core.anomaly_detector import AnomalyDetector
+from src.core.scenario_runner import ScenarioForecaster
+from src.db.db_manager import DatabaseManager
 
 
 class TestForecaster(unittest.TestCase):
@@ -139,6 +144,59 @@ class TestScenarioForecaster(unittest.TestCase):
         bad_df = pd.DataFrame({'Date': ['2023-01-01'], 'wrong_col': [100]})
         with self.assertRaises(ValueError):
             ScenarioForecaster.apply_scenario(bad_df, percentage_change=10.0)
+
+
+class TestDatabaseManager(unittest.TestCase):
+    """Validates the SQLite database layer."""
+
+    def setUp(self):
+        """Create a temporary database for each test."""
+        self.temp_dir = tempfile.mkdtemp()
+        self.db_path = os.path.join(self.temp_dir, "test_forecast.db")
+        self.db = DatabaseManager(database_url=f"sqlite:///{self.db_path}")
+        self.db.create_tables()
+
+    def tearDown(self):
+        """Clean up the temporary database."""
+        self.db.drop_tables()
+        if os.path.exists(self.db_path):
+            os.remove(self.db_path)
+
+    def test_create_tables_no_error(self):
+        """Table creation should complete without errors (idempotent)."""
+        self.db.create_tables()  # calling twice should be safe
+
+    def test_insert_and_load_metric(self):
+        """A metric inserted via insert_metric must appear in load_metrics_as_dataframe."""
+        from datetime import date
+        self.db.insert_metric(date(2023, 1, 1), 100.0, "traffic")
+        self.db.insert_metric(date(2023, 1, 8), 105.0, "traffic")
+
+        df = self.db.load_metrics_as_dataframe("traffic")
+        self.assertEqual(len(df), 2)
+        self.assertIn("traffic", df.columns)
+        self.assertEqual(df.iloc[0]["traffic"], 100.0)
+
+    def test_seed_from_csv(self):
+        """Seeding from the sample CSV must populate the metrics table."""
+        csv_path = os.path.join(PROJECT_ROOT, "assets", "sample_data.csv")
+        if os.path.exists(csv_path):
+            self.db.seed_from_csv(csv_path, metric_name="traffic")
+            df = self.db.load_metrics_as_dataframe("traffic")
+            self.assertGreater(len(df), 0)
+
+    def test_save_and_load_forecast_history(self):
+        """Saving a forecast must persist it and be retrievable."""
+        dates = pd.date_range(start='2023-01-01', periods=12, freq='W-SUN')
+        values = [100, 102, 101, 105, 103, 107, 108, 106, 110, 112, 111, 115]
+        df = pd.DataFrame({'date': dates, 'traffic': values})
+
+        forecaster = Forecaster(df, target_col='traffic', date_col='date')
+        forecast_df = forecaster.generate_forecast(weeks_ahead=2)
+
+        self.db.save_forecast(forecast_df, metric_name="traffic")
+        history = self.db.load_forecast_history("traffic")
+        self.assertEqual(len(history), 2)
 
 
 if __name__ == '__main__':

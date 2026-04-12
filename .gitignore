@@ -33,3 +33,7 @@ build/
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Database files (SQLite)
+data/*.db
+
