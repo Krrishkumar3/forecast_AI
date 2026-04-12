@@ -1,0 +1,42 @@
+# render.yaml
+# Render Blueprint for "Infrastructure as Code" deployment.
+# This deploys your API and Dashboard as two separate, isolated Web Services.
+
+services:
+  # ---------------------------------------------------------
+  # 1. FastAPI Web Service
+  # ---------------------------------------------------------
+  - type: web
+    name: forecast-api
+    env: docker
+    region: frankfurt
+    plan: free
+    # Override the start.sh with a direct uvicorn command mapped to Render's $PORT
+    dockerCommand: "uvicorn src.api.app:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false # Requires you to securely paste this in the Render dashboard
+    disk:
+      # Persistent Disk ensures SQLite data survives deployments and server restarts
+      name: sqlite-api-data
+      mountPath: /app/data
+      sizeGB: 1
+
+  # ---------------------------------------------------------
+  # 2. Streamlit Web Service
+  # ---------------------------------------------------------
+  - type: web
+    name: forecast-dashboard
+    env: docker
+    region: frankfurt
+    plan: free
+    # Override the start.sh with a direct streamlit command mapped to Render's $PORT
+    dockerCommand: "streamlit run src/dashboard.py --server.port $PORT --server.address 0.0.0.0 --server.headless true --browser.gatherUsageStats false"
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+    disk:
+      name: sqlite-dashboard-data
+      mountPath: /app/data
+      sizeGB: 1

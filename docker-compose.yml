@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------
+  # 1. FastAPI Backend Service
+  # ---------------------------------------------------------
+  api:
+    build: .
+    container_name: forecast_api
+    # Override the default CMD to only run FastAPI
+    command: uvicorn src.api.app:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      # Pulls GEMINI_API_KEY from your host's environment automatically
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      # Mount a persistent Docker volume to /app/data so SQLite survives restarts
+      - forecast_sqlite_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ---------------------------------------------------------
+  # 2. Streamlit Dashboard Service
+  # ---------------------------------------------------------
+  dashboard:
+    build: .
+    container_name: forecast_dashboard
+    # Override the default CMD to only run Streamlit
+    command: streamlit run src/dashboard.py --server.port 8501 --server.address 0.0.0.0 --server.headless true
+    ports:
+      - "8501:8501"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      # The dashboard shares the same persistent volume as the API
+      - forecast_sqlite_data:/app/data
+
+volumes:
+  # Define the persistent volume for SQLite
+  forecast_sqlite_data:
