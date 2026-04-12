@@ -188,7 +188,7 @@ class DatabaseManager:
                         value=float(row[metric_name]),
                     ))
             session.commit()
-            print(f"✅ Seeded {len(df)} records into '{metric_name}' metrics table.")
+            print(f"Seeded {len(df)} records into '{metric_name}' metrics table.")
         finally:
             session.close()
 
@@ -237,7 +237,7 @@ class DatabaseManager:
                 )
                 session.add(record)
             session.commit()
-            print(f"✅ Saved {len(forecast_df)} forecast records to history.")
+            print(f"Saved {len(forecast_df)} forecast records to history.")
         finally:
             session.close()
 

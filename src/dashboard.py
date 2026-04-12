@@ -37,7 +37,7 @@ from src.core.explainer import AnomalyExplainer
 # =====================================================================
 st.set_page_config(
     page_title="NatWest AI Forecasting",
-    page_icon="🏦",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -166,12 +166,12 @@ st.markdown("""
 # Sidebar
 # =====================================================================
 with st.sidebar:
-    st.markdown("## 🏦 NatWest AI Forecasting")
+    st.markdown("## NatWest AI Forecasting")
     st.markdown("<p class='info-text'>Upload your data and configure the forecasting engine.</p>", unsafe_allow_html=True)
     st.markdown("---")
 
     # ---- Data source ----
-    st.markdown("### 📂 Data Source")
+    st.markdown("### Data Source")
     data_source = st.radio(
         "Choose data source:",
         ["Use sample dataset", "Upload CSV"],
@@ -192,14 +192,14 @@ with st.sidebar:
     st.markdown("---")
 
     # ---- Forecast settings ----
-    st.markdown("### ⚙️ Forecast Settings")
+    st.markdown("### Forecast Settings")
     weeks_ahead = st.slider("Forecast horizon (weeks)", min_value=1, max_value=6, value=4, help="How many weeks to project forward")
     z_threshold = st.slider("Anomaly sensitivity (Z-score)", min_value=1.5, max_value=4.0, value=2.5, step=0.1, help="Lower = more sensitive (more anomalies flagged)")
 
     st.markdown("---")
 
     # ---- Scenario settings ----
-    st.markdown("### 🔮 What-If Scenario")
+    st.markdown("### What-If Scenario")
     scenario_pct = st.slider("Volume change (%)", min_value=-50, max_value=100, value=15, step=5, help="Simulate a percentage change in the metric")
 
     st.markdown("---")
@@ -238,7 +238,7 @@ df["date"] = pd.to_datetime(df["date"])
 # =====================================================================
 # Header
 # =====================================================================
-st.markdown("# 🏦 AI Predictive Forecasting Dashboard")
+st.markdown("# AI Predictive Forecasting Dashboard")
 st.markdown("<p class='info-text'>Transparent, explainable forecasting — powered by Holt-Winters Exponential Smoothing with simple baseline comparison.</p>", unsafe_allow_html=True)
 
 # ---- KPI row ----
@@ -259,7 +259,7 @@ st.markdown("---")
 # Tabs
 # =====================================================================
 tab_forecast, tab_anomalies, tab_scenario = st.tabs([
-    "📈 Forecast", "🔍 Spot Trouble", "🔮 What-If Scenario"
+    "Forecast", "Spot Trouble", "What-If Scenario"
 ])
 
 # =====================================================================
@@ -347,13 +347,13 @@ with tab_forecast:
 
     # ---- Legend ----
     legend_cols = st.columns(4)
-    legend_cols[0].markdown("🟣 **Historical Data**")
-    legend_cols[1].markdown("🟢 **Likely Estimate**")
-    legend_cols[2].markdown("🟡 **Baseline (Moving Avg)**")
-    legend_cols[3].markdown("🔵 **90% Confidence Band**")
+    legend_cols[0].markdown("**Historical Data**")
+    legend_cols[1].markdown("**Likely Estimate**")
+    legend_cols[2].markdown("**Baseline (Moving Avg)**")
+    legend_cols[3].markdown("**90% Confidence Band**")
 
     # ---- Data table ----
-    with st.expander("📋 View raw forecast data"):
+    with st.expander("View raw forecast data"):
         st.dataframe(forecast_df.round(2), use_container_width=True, hide_index=True)
 
 
@@ -361,14 +361,14 @@ with tab_forecast:
 # TAB 2: Anomaly Detection
 # =====================================================================
 with tab_anomalies:
-    st.markdown("### 🔍 Spot Trouble — Anomaly Detection")
+    st.markdown("### Spot Trouble — Anomaly Detection")
     st.markdown(f"<p class='info-text'>Scanning historical data with a Z-score threshold of <strong>{z_threshold}</strong>. Points deviating beyond this threshold from the rolling mean are flagged.</p>", unsafe_allow_html=True)
 
     detector = AnomalyDetector(df, target_col=metric_col, date_col="date")
     anomalies = detector.detect_anomalies(window_size=4, dynamic_z_score_threshold=z_threshold)
 
     if anomalies.empty:
-        st.markdown('<div class="success-card">✅ No significant anomalies detected. The data looks healthy!</div>', unsafe_allow_html=True)
+        st.markdown('<div class="success-card">No significant anomalies detected. The data looks healthy!</div>', unsafe_allow_html=True)
     else:
         st.markdown(f"**{len(anomalies)} anomaly(ies) detected:**")
         explainer = AnomalyExplainer()
@@ -378,7 +378,7 @@ with tab_anomalies:
             actual = row[metric_col]
             expected = row["Rolling_Mean"]
             z_score = row["Z_Score"]
-            direction = "📈 Spike" if actual > expected else "📉 Dip"
+            direction = "Spike" if actual > expected else "Dip"
             diff_pct = abs((actual - expected) / expected) * 100
 
             explanation = explainer.generate_explanation(
@@ -394,7 +394,7 @@ with tab_anomalies:
                 Value: <strong>{actual:.0f}</strong> &nbsp;|&nbsp; Expected: <strong>{expected:.1f}</strong> &nbsp;|&nbsp;
                 Deviation: <strong>{diff_pct:.0f}%</strong> &nbsp;|&nbsp; Z-Score: <strong>{z_score:.2f}</strong>
                 <br/><br/>
-                💡 {explanation}
+                {explanation}
             </div>
             """, unsafe_allow_html=True)
 
@@ -442,7 +442,7 @@ with tab_anomalies:
 # TAB 3: Scenario Forecasting
 # =====================================================================
 with tab_scenario:
-    st.markdown("### 🔮 What-If Scenario Modelling")
+    st.markdown("### What-If Scenario Modelling")
     st.markdown(f"<p class='info-text'>Comparing the baseline forecast against a <strong>{scenario_pct:+d}%</strong> volume adjustment. Move the slider in the sidebar to update in real-time.</p>", unsafe_allow_html=True)
 
     scenario_df = ScenarioForecaster.apply_scenario(forecast_df, percentage_change=float(scenario_pct))
@@ -497,7 +497,7 @@ with tab_scenario:
     st.altair_chart(combined, use_container_width=True)
 
     # ---- Data table ----
-    with st.expander("📋 View scenario comparison data"):
+    with st.expander("View scenario comparison data"):
         display_df = scenario_df.copy()
         display_df.columns = ["Date", "Baseline Estimate", f"Scenario ({scenario_pct:+d}%)", "Impact"]
         st.dataframe(display_df.round(2), use_container_width=True, hide_index=True)
@@ -506,7 +506,7 @@ with tab_scenario:
     if scenario_pct > 0:
         st.markdown(f"""
         <div class="success-card">
-            📊 <strong>Insight:</strong> A {scenario_pct:+d}% increase in volume would add approximately
+            <strong>Insight:</strong> A {scenario_pct:+d}% increase in volume would add approximately
             <strong>{avg_impact:+.1f} units/week</strong> to the projected metric, totalling
             <strong>{total_impact:+.1f}</strong> additional units over the {weeks_ahead}-week forecast window.
         </div>
@@ -514,7 +514,7 @@ with tab_scenario:
     elif scenario_pct < 0:
         st.markdown(f"""
         <div class="anomaly-card">
-            ⚠️ <strong>Risk Alert:</strong> A {scenario_pct:+d}% reduction would decrease the metric by approximately
+            <strong>Risk Alert:</strong> A {scenario_pct:+d}% reduction would decrease the metric by approximately
             <strong>{abs(avg_impact):.1f} units/week</strong>, representing a total loss of
             <strong>{abs(total_impact):.1f}</strong> units over the {weeks_ahead}-week window.
         </div>
@@ -527,7 +527,7 @@ with tab_scenario:
 st.markdown("---")
 st.markdown(
     "<p style='text-align:center; color:#636e72; font-size:0.8rem;'>"
-    "Built with ❤️ for NatWest 'Code for Purpose' Hackathon &nbsp;|&nbsp; "
+    "Built with for NatWest 'Code for Purpose' Hackathon &nbsp;|&nbsp; "
     "Powered by Holt-Winters Exponential Smoothing &nbsp;|&nbsp; "
     "AI Explanations via Google Gemini (Free Tier)"
     "</p>",

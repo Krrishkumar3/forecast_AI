@@ -1,10 +1,10 @@
-# 🏦 NatWest Code for Purpose — AI Predictive Forecasting
+# NatWest Code for Purpose — AI Predictive Forecasting
 
 > A lightweight, transparent AI forecasting tool that transforms historical data into actionable insights — built for the NatWest Group "Code for Purpose" hackathon.
 
 ---
 
-## 📖 Overview
+## Overview
 
 | | |
 |---|---|
@@ -14,7 +14,7 @@
 
 ---
 
-## ✨ Features
+## Features
 
 ### 1. Short-Term Forecasting (1–6 weeks)
 - Generates a **central "likely" estimate** using Holt-Winters Exponential Smoothing
@@ -51,7 +51,7 @@
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Component | Technology |
 |---|---|
@@ -66,7 +66,7 @@
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 forecast_AI/
@@ -101,7 +101,7 @@ forecast_AI/
 
 ---
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 - Python 3.9 or higher
@@ -129,7 +129,7 @@ cp .env.example .env
 
 ---
 
-## ▶️ Usage
+## Usage
 
 ### Option 1: Interactive Dashboard (Recommended)
 
@@ -186,7 +186,7 @@ python -m pytest tests/ -v
 
 ---
 
-## 📊 CLI Output Example
+## CLI Output Example
 
 ```text
 ============================================================
@@ -222,7 +222,7 @@ Found 6 anomaly(ies) in the historical dataset!
 2024-01-14           115.01             132.26             17.25
 2024-01-21           115.32             132.62             17.30
 
-✅ Pipeline complete.
+Pipeline complete.
 ```
 
 > **Reading the output:**
@@ -233,7 +233,7 @@ Found 6 anomaly(ies) in the historical dataset!
 
 ---
 
-## 🔒 Security
+## Security
 
 - All API keys are loaded from **environment variables** via `python-dotenv`
 - A `.env.example` is provided as a template — real `.env` files are git-ignored
@@ -242,7 +242,7 @@ Found 6 anomaly(ies) in the historical dataset!
 
 ---
 
-## 🧪 Testing
+## Testing
 
 **16 tests** across 4 test classes:
 
@@ -255,13 +255,13 @@ Found 6 anomaly(ies) in the historical dataset!
 
 ---
 
-## 📝 License
+## License
 
 This project was built for the **NatWest "Code for Purpose" Hackathon** and is provided under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/my-improvement`)
@@ -271,4 +271,4 @@ This project was built for the **NatWest "Code for Purpose" Hackathon** and is p
 
 ---
 
-*Built with ❤️ for NatWest Code for Purpose*
+*Built with for NatWest Code for Purpose*

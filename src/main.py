@@ -108,7 +108,7 @@ def run_pipeline():
     print(f"--- 3. SCENARIO FORECASTING (What-if: +{scenario_pct:.0f}% Volume) ---")
     scenario_df = ScenarioForecaster.apply_scenario(forecast_df, percentage_change=scenario_pct)
     print(scenario_df.to_string(index=False))
-    print("\n✅ Pipeline complete.")
+    print("\nPipeline complete.")
 
 
 if __name__ == "__main__":
