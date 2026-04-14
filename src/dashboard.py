@@ -88,6 +88,10 @@ st.markdown("""
     [data-testid="stMetricValue"] {
         color: #ffffff !important;
         font-weight: 700 !important;
+        font-size: clamp(1rem, 2vw, 1.75rem) !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        white-space: normal !important;
     }
     
     /* ---- Cards / containers ---- */
@@ -242,11 +246,14 @@ st.markdown("# Advanced Predictive Forecasting Dashboard")
 st.markdown("<p class='info-text'>Transparent, explainable forecasting — powered by Holt-Winters Exponential Smoothing with simple baseline comparison.</p>", unsafe_allow_html=True)
 
 # ---- KPI row ----
+date_min = df['date'].min().strftime("%b %d, '%y")
+date_max = df['date'].max().strftime("%b %d, '%y")
+
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.metric("Data Points", f"{len(df)}")
 with col2:
-    st.metric("Date Range", f"{df['date'].dt.date.min()} → {df['date'].dt.date.max()}")
+    st.metric("Date Range", f"{date_min} → {date_max}")
 with col3:
     st.metric("Latest Value", f"{df[metric_col].iloc[-1]:.0f}")
 with col4:
