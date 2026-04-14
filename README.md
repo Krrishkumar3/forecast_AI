@@ -2,6 +2,8 @@
 
 > A lightweight, transparent forecasting tool that transforms historical data into actionable insights — built for the NatWest Group "Code for Purpose" hackathon.
 
+🚀 **Live Streamlit App:** [https://forecastai-mxgybk5knytaqsxtmsvhma.streamlit.app](https://forecastai-mxgybk5knytaqsxtmsvhma.streamlit.app)
+
 ---
 
 ## Overview
