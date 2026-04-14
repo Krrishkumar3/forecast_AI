@@ -88,10 +88,35 @@ st.markdown("""
     [data-testid="stMetricValue"] {
         color: #ffffff !important;
         font-weight: 700 !important;
-        font-size: clamp(1rem, 2vw, 1.75rem) !important;
-        word-break: break-word !important;
-        overflow-wrap: break-word !important;
+    }
+    [data-testid="stMetricValue"] * {
+        overflow: visible !important;
+        text-overflow: unset !important;
         white-space: normal !important;
+    }
+    
+    /* ---- Custom date-range card ---- */
+    .date-range-card {
+        background: rgba(108, 92, 231, 0.1);
+        border: 1px solid rgba(108, 92, 231, 0.25);
+        border-radius: 12px;
+        padding: 16px;
+        backdrop-filter: blur(10px);
+        height: 100%;
+    }
+    .date-range-card .label {
+        color: #a29bfe;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+        font-weight: 400;
+    }
+    .date-range-card .value {
+        color: #ffffff;
+        font-size: 1.6rem;
+        font-weight: 700;
+        line-height: 1.3;
     }
     
     /* ---- Cards / containers ---- */
@@ -253,7 +278,12 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.metric("Data Points", f"{len(df)}")
 with col2:
-    st.metric("Date Range", f"{date_min} → {date_max}")
+    st.markdown(f"""
+    <div class="date-range-card">
+        <div class="label">Date Range</div>
+        <div class="value">{date_min}<br/>→ {date_max}</div>
+    </div>
+    """, unsafe_allow_html=True)
 with col3:
     st.metric("Latest Value", f"{df[metric_col].iloc[-1]:.0f}")
 with col4:
