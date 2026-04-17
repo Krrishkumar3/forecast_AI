@@ -1,6 +1,7 @@
 pandas
 numpy
 statsmodels
+scipy
 google-generativeai
 python-dotenv
 pytest

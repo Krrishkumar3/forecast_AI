@@ -22,6 +22,7 @@
 - Generates a **central "likely" estimate** using Holt-Winters Exponential Smoothing
 - Provides **Low / High uncertainty bounds** (90% confidence interval)
 - Includes a **simple moving-average baseline** for transparent comparison
+- **One-click CSV export** of forecast results
 
 ### 2. Anomaly Detection
 - Scans historical data using a **rolling Z-score** approach to flag unexpected spikes or dips
@@ -32,20 +33,47 @@
 - Apply percentage-based adjustments (e.g. *"+10% traffic"*, *"−15% conversion"*)
 - View **side-by-side comparison** of baseline vs. scenario with numerical impact
 
-### 4. Interactive Dashboard (Streamlit)
+### 4. Walk-Forward Backtesting & Model Accuracy
+- **Gold-standard time-series validation** using expanding-window walk-forward methodology
+- Calculates **MAPE, MAE, RMSE**, and **Directional Accuracy** with letter-grade scoring
+- Visualises **Actual vs. Predicted** overlays and **error distribution** histograms
+- Provides plain-English interpretation of model reliability
+
+### 5. Trend Decomposition & Autocorrelation
+- Classical **additive decomposition** into Trend, Seasonal, and Residual components
+- Interactive **Autocorrelation Function (ACF)** chart with significance bounds
+- Key statistics: trend direction, slope, volatility, and data range
+
+### 6. Goal Tracking & Probability Analysis
+- Set a **target business value** for any forecast week
+- Calculates **statistical probability of success** using model uncertainty
+- Color-coded gauges (Green/Yellow/Red) with actionable interpretation
+- Reverse-scenario linking: auto-calculates the required growth rate
+
+### 7. Data Quality Health Check
+- Automated scanning for **missing values, date gaps, extreme outliers, duplicates**
+- Generates a **0–100% Health Score** with diagnostic report
+- Summary statistics and data-readiness assessment
+
+### 8. Auto-Generated Executive Summary
+- One-paragraph **plain-English narrative** auto-generated at page load
+- Summarises forecast direction, model accuracy grade, anomaly count, trend direction, and volatility
+- Designed for non-technical stakeholders and executive consumption
+
+### 9. Interactive Dashboard (Streamlit)
+- **7 feature tabs** with premium dark glassmorphism UI
 - **Upload CSV** or use bundled sample data
 - **Line charts** with shaded confidence bands (Altair)
 - **Anomaly cards** with automated insights
 - **Real-time What-If slider** that updates projections instantly
-- Premium dark glassmorphism UI
 
-### 5. REST API (FastAPI)
+### 10. REST API (FastAPI)
 - `POST /forecast` — Returns predictions with confidence intervals
 - `POST /detect-anomalies` — Returns flagged indices with Z-score rationales
 - `POST /scenario` — Returns adjusted projections for what-if analysis
 - Auto-generated Swagger docs at `/docs`
 
-### 6. Database Layer (SQLite + SQLAlchemy)
+### 11. Database Layer (SQLite + SQLAlchemy)
 - **metrics** table for time-series data storage
 - **forecast_history** table for hold-out validation
 - Utility to bridge DB data directly into pandas DataFrames
@@ -59,10 +87,13 @@
 |---|---|
 | Language | Python 3.9+ |
 | Forecasting | `pandas`, `numpy`, `statsmodels` (Holt-Winters) |
+| Backtesting | Walk-forward validation with `statsmodels` |
+| Decomposition | `statsmodels.tsa.seasonal`, ACF analysis |
+| Goal Probability | `scipy.stats` (Normal distribution) |
 | Dashboard | `streamlit`, `altair` |
 | REST API | `fastapi`, `uvicorn`, `pydantic` |
 | Database | `sqlalchemy`, SQLite (default) / PostgreSQL |
-| Explanations | Automated statistical heuristics |
+| Explanations | Automated statistical heuristics + Gemini LLM |
 | Environment | `python-dotenv` |
 | Testing | `pytest` |
 
@@ -83,14 +114,16 @@ forecast_AI/
 │   │   ├── forecaster.py            # Holt-Winters forecasting engine
 │   │   ├── anomaly_detector.py      # Z-score anomaly detection
 │   │   ├── scenario_runner.py       # What-if scenario modelling
-│   │   └── explainer.py             # Gemini / rule-based explanations
+│   │   ├── explainer.py             # Gemini / rule-based explanations
+│   │   ├── backtester.py            # Walk-forward validation engine
+│   │   └── trend_analyzer.py        # Trend decomposition & ACF
 │   ├── api/                         # REST API layer
 │   │   ├── __init__.py
 │   │   └── app.py                   # FastAPI endpoints
 │   ├── db/                          # Database layer
 │   │   ├── __init__.py
 │   │   └── db_manager.py            # SQLAlchemy models & utilities
-│   ├── dashboard.py                 # Streamlit interactive UI
+│   ├── dashboard.py                 # Streamlit interactive UI (7 tabs)
 │   └── main.py                      # CLI pipeline orchestrator
 ├── tests/
 │   ├── __init__.py
